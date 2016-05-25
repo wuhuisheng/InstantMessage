@@ -8,20 +8,20 @@
 
 #import "ViewController.h"
 #import <AsyncSocket.h>
-#import <GCDAsyncSocket.h>
+//#import <GCDAsyncSocket.h>
 @interface ViewController ()<AsyncSocketDelegate>
 @property (weak, nonatomic) IBOutlet UILabel *hostName;
 @property (weak, nonatomic) IBOutlet UILabel *portName;
 @property (weak, nonatomic) IBOutlet UITextField *host;
 @property (weak, nonatomic) IBOutlet UITextField *port;
+@property (weak, nonatomic) IBOutlet UITextView *historytext;
+@property (weak, nonatomic) IBOutlet UITextView *massageText;
+
+@property(nonatomic,strong) AsyncSocket * socket;
+@property(nonatomic,strong) NSDateFormatter * format;
 - (IBAction)sendClick:(UIButton *)sender;
 - (IBAction)disconnect:(id)sender;
-
 - (IBAction)connect:(id)sender;
-@property (weak, nonatomic) IBOutlet UITextView *historytext;
-
-@property (weak, nonatomic) IBOutlet UITextView *massageText;
-@property(nonatomic,strong) AsyncSocket * socket;
 @end
 
 @implementation ViewController
@@ -32,19 +32,18 @@
     }
     return _socket;
 }
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-    
-    self.historytext.editable=NO;
-    
+-(NSDateFormatter *)format{
+    if (!_format) {
+        _format=[[NSDateFormatter alloc]init];
+        [_format setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    }
+    return _format;
 }
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
+/**
+ *  发送数据包给服务器
+ *
+ *  @param sender 发送按钮
+ */
 - (IBAction)sendClick:(UIButton *)sender {
     
     //发给服务器
@@ -55,20 +54,29 @@
     [self.socket readDataWithTimeout:-1 tag:0];
   
 }
-
+/**
+ *  断开连接
+ *
+ *  @param sender 断开连接按钮
+ */
 - (IBAction)disconnect:(id)sender {
     //断开连接
     [self.socket disconnect];
 }
 
+/**
+ *  与服务器建立长连接
+ *
+ *  @param sender
+ */
 - (IBAction)connect:(id)sender {
-    //连接
-//    [self.socket disconnect];
     NSError * error=nil;
     NSLog(@"%@====%@",self.host.text,self.port.text);
    BOOL result= [self.socket connectToHost:self.host.text onPort:[self.port.text integerValue] error:&error];
     NSLog(@"%d连接结果%@",result,error);
 }
+
+#pragma mark * AsyncSocketDelegate
 - (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port{
     NSLog(@"连接成功");
     [self.socket readDataWithTimeout:-1 tag:0];
@@ -81,7 +89,6 @@
 
 - (void)onSocketDidDisconnect:(AsyncSocket *)sock
 {
-//    NSString *msg = @"Sorry this connect is failure";
     NSLog(@"失去连接");
 }
 
@@ -103,13 +110,10 @@
        
     }
     
-
+   //将数据包转换为字符串
     NSString* aStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    NSLog(@"Hava received datas is :%@",aStr);
-    NSDate * date = [NSDate date];
-    NSDateFormatter * format =[[NSDateFormatter alloc] init];
-    [format setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    NSString * datestring = [format stringFromDate:date];
+   
+    NSString * datestring = [self.format stringFromDate:[NSDate date]];
     NSString * massege =[datestring stringByAppendingString:[NSString stringWithFormat:@":%@",aStr]];
     NSLog(@"%@",massege);
     NSString * text = self.historytext.text;
@@ -118,9 +122,10 @@
     self.historytext.text=text;
     [self.socket readDataWithTimeout:-1 tag:0];
 }
+
+
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     [self.view endEditing:YES];
-
 }
 
 

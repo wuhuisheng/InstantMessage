@@ -7,11 +7,6 @@
 //
 
 #import "AppDelegate.h"
-#define IOS7 [[[UIDevice currentDevice]systemVersion] floatValue] >= 7
-#define IOS8 [[[UIDevice currentDevice]systemVersion] floatValue] >= 8.0
-#define IOS9 [[[UIDevice currentDevice]systemVersion] floatValue] >= 9
-#define IOS7_OR_LATER   ( [[[UIDevice currentDevice] systemVersion] compare:@"7.0"] != NSOrderedAscending )
-#define IOS8_OR_LATER   ( [[[UIDevice currentDevice] systemVersion] compare:@"8.0"] != NSOrderedAscending )
 @interface AppDelegate ()
 
 @end
@@ -34,9 +29,9 @@
         UIRemoteNotificationTypeAlert;
         [[UIApplication sharedApplication] registerForRemoteNotificationTypes:notificationTypes];
     }
+    
     [application setApplicationIconBadgeNumber:0];
-    
-    
+ 
     return YES;
 }
 
