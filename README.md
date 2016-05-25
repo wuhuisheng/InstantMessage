@@ -1,5 +1,5 @@
 # InstantMessage
-socktTCPdemo
+一个socket（TCP）的demo，基于AsyncSocket实现
 ## 使用步骤
 1.下载项目
 2.解压SocketTool.zip
